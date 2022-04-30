@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+
+<header>
+  <div class="collapse bg-dark" id="navbarHeader">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-8 col-md-7 py-4">
+          <h4 class="text-white">About</h4>
+          <p class="text-muted">Have you ever wondered what is the most common colour on the Internet? Well, I did.
+            An automatic robot crawls each day most popular news websites, finds top 10 images and utilizes machine learning to find
+            clusters of most occurring colours.</p>
+        </div>
+        <div class="col-sm-4 offset-md-1 py-4">
+          <h4 class="text-white">Contact</h4>
+          <ul class="list-unstyled">
+             <li><a href="mailto:coloursoftheworld@diplabs.app" class="text-white">Email me coloursoftheworld (at) diplabs.app</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a href="#" class="navbar-brand d-flex align-items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="d-block mx-auto" role="img" viewBox="0 0 24 24"><title>Colours Of The World</title><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
+        &nbsp;
+
+<!--          https://stackoverflow.com/questions/1700661/how-to-access-array-elements-in-a-django-template -->
+          {% for char in title %}
+          <h4 style="color: {{ char.1 }}">{{ char.0 }}</h4>
+          {% endfor %}
+<!--          <strong>Colors Of The World</strong>-->
+      </a>
+
+
+      <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
+        <a class="me-3 py-2  text-decoration-none" href="#">Home</a>
+        <a class="me-3 py-2  text-decoration-none" href="#">About</a>
+        <a class="me-3 py-2  text-decoration-none" href="#">Statistics</a>
+
+      </nav>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+
+
+
+
+
+
+
+
+
+<main>
+
+     <div class="album py-5 bg-light">
+    <div class="container">
+
+
+<section class="py-5 text-center container">
+    <div class="row py-lg-3">
+      <div class="col-lg-6 col-md-8 mx-auto">
+
+
+          <figure class="text-center">
+                <blockquote class="blockquote">
+                    <p>{{ quote.quote_text }}</p>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                        <cite title="Source Title">{{ quote.author }}</cite>
+                </figcaption>
+            </figure>
+
+
+      </div>
+    </div>
+  </section>
+
+
+
+
+
+
+
+
+
+
+
+{% for website in final_array%}
+
+
+<p>
+
+     <a href="{{ website.url }}"><h4>{{ website.url }}</h4> </a><h6> {{ website.date }}</h6>
+<!--    <strong>Average color: </strong>{{ average_color }}<BR>-->
+<!--    <strong>Std: </strong>{{ std }} <BR><BR>-->
+
+
+
+
+    <div class="row">
+
+        <div class="card m-2" style="width: 10rem; padding: 5px;">
+             <div style="background-color: {{ website.average_color }}; height: 5rem; ">
+
+            </div>
+<!--        <img src="#" class="card-img-top" style="background-color: {{ cluster.color }} " alt="">-->
+            <div class="card-body">
+            <p class="card-text"><strong>Average </strong> <BR>{{ website.average_color }}</p>
+            </div>
+        </div>
+
+
+
+
+    {% for cluster in website.clusters%}
+
+    <div class="card m-2" style="width: 10rem; padding: 5px;">
+        <div style="background-color: {{ cluster.color }}; height: 5rem; ">
+
+        </div>
+<!--        <img src="#" class="card-img-top" style="background-color: {{ cluster.color }} " alt="">-->
+        <div class="card-body">
+            <p class="card-text"><strong>Cluster: {{ cluster.cluster_number }}</strong> <BR> {{ cluster.color }} </p>
+        </div>
+    </div>
+
+
+
+    {% endfor %}
+
+
+    </div>
+
+
+
+
+</p>
+
+{% endfor %}
+
+
+    </div>
+     </div>
+
+</main>
+  {% endblock %}
+
