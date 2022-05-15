@@ -1,10 +1,15 @@
+import io
+import math
 import random
-
+from PIL import ImageColor
+import numpy as np
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Cluster, SearchResult, Website, Quote
 from django.utils import timezone
 from . import color_fetcher
+from PIL import Image
+import base64
 
 
 # Trzeba jakos aby pokazywało ostatnie dobre z datą. ? Aby nie wrzucało do bazy pustych najlepiej
@@ -41,7 +46,6 @@ def index(request):
 
     quote_database = Quote.objects.all()
     random_quote = random.choice(quote_database)
-
 
     return render(request, 'index.html', {
         'final_array': final_array,
@@ -101,6 +105,113 @@ def starter(request):
         return HttpResponse('Sucess')
     else:
         return HttpResponse("not good")
+
+
+class Image_check():
+    def __init__(self, site, daily, clusterss):
+        self.site = site
+        self.daily = daily
+        self.clusterss = clusterss
+
+
+
+def image_from_database(request):
+
+    images = []
+    sites = get_sites_to_check()
+    daily = daily_as_pixel(sites)
+    clusterss = clusters_as_pixels(sites)
+
+
+    for x in range(len(sites)):
+        images.append(Image_check(site = sites[x], daily=daily[x], clusterss=clusterss[x]))
+
+    title = random_color_string('Colors Of The World')
+    return render(request, "image.html", {'images': images, 'title': title})
+
+
+def get_sites_to_check():
+    websites_to_show = Website.objects.distinct().filter(show=True)
+    return websites_to_show
+
+def daily_as_pixel(websites_to_show):
+    # websites_to_show = Website.objects.distinct().filter(show=True)
+    # print(len(websites_to_show))
+
+    # https://stackoverflow.com/questions/687295/how-do-i-do-a-not-equal-in-django-queryset-filtering
+
+    final_array = []
+    for website in websites_to_show:
+        search_result = SearchResult.objects.filter(url=website)
+        search_result_len = SearchResult.objects.filter(url=website).count()
+        size = get_closest_square(search_result_len)
+
+        array = []
+
+        counter = 0
+        for pixel in search_result:
+            col = ImageColor.getcolor(pixel.average_color, "RGB")
+            array.append((col[0], col[1], col[2], 255))
+            counter += 1
+
+        if len(array) < size:
+            for x in range(0, size - len(array)):
+                array.append((0, 0, 0, 0))
+
+        array2d = np.array(array, np.uint8)
+
+        # https: // stackoverflow.com / questions / 72161115 / rgb - array - to - pil - image / 72161225  # 72161225
+        im_pil = Image.fromarray(obj=array2d.reshape(int(math.sqrt(size)), int(math.sqrt(size)), 4), mode='RGBA')
+        data = io.BytesIO()
+        im_pil.save(data, "png")
+        encoded_img = base64.b64encode(data.getvalue())
+        decoded_img = encoded_img.decode('utf-8')
+        img_data = f"data:image/png;base64,{decoded_img}"
+        final_array.append(img_data)
+
+    return final_array
+
+
+def clusters_as_pixels(websites_to_show):
+    # websites_to_show = Website.objects.distinct().filter(show=True)
+    # print(len(websites_to_show))
+
+    # https://stackoverflow.com/questions/687295/how-do-i-do-a-not-equal-in-django-queryset-filtering
+
+    final_array = []
+    for website in websites_to_show:
+        search_result = SearchResult.objects.filter(url=website)
+        array = []
+        for result in search_result:
+
+            search_result_clusters = Cluster.objects.filter(search_result_id=result)
+
+            counter = 0
+            for pixel in search_result_clusters:
+                col = ImageColor.getcolor(pixel.color, "RGB")
+                array.append((col[0], col[1], col[2], 255))
+                counter += 1
+
+        size = get_closest_square(len(array))
+        if len(array) < size:
+            for x in range(0, size - len(array)):
+                array.append((0, 0, 0, 0))
+        array2d = np.array(array, np.uint8)
+
+        # https: // stackoverflow.com / questions / 72161115 / rgb - array - to - pil - image / 72161225  # 72161225
+        im_pil = Image.fromarray(obj=array2d.reshape(int(math.sqrt(size)), int(math.sqrt(size)), 4), mode='RGBA')
+        data = io.BytesIO()
+        im_pil.save(data, "png")
+        encoded_img = base64.b64encode(data.getvalue())
+        decoded_img = encoded_img.decode('utf-8')
+        img_data = f"data:image/png;base64,{decoded_img}"
+        final_array.append(img_data)
+
+    return final_array
+
+
+def get_closest_square(number):
+    return int(math.pow(math.ceil(math.sqrt(number)), 2))
 
 
 def rgb2hex(r, g, b):

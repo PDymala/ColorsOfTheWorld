@@ -26,4 +26,5 @@ class Quote(models.Model):
     quote_text = models.CharField(max_length=500)
     author = models.CharField(max_length=40)
 
+
 #TODO KLASA Z PARAMETRAMI szukania ? tak aby nie grzebac w kodzie?

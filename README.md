@@ -7,7 +7,7 @@ Url: https://colorsoftheworld.diplabs.app/
 ## Tech
 - Deployment: Cloud RUN
 - DB: MySQL (AWS)
-- Additionally: Cloud domains, Cloud Scheduler
+- Additionally: Cloud domains, Cloud Scheduler, Secret Manager
 - SciKitLearn  for machine learning
 - Pillow, numpy etc for processing
 - Python Django for backend
